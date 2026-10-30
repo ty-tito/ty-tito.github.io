@@ -1,0 +1,10 @@
+# Publish only the website itself. Everything else in this folder
+# (source footage, the 4 GB .avi, project notes, screenshots, review files) stays local.
+/*
+!/.gitignore
+!/.nojekyll
+!/index.html
+!/pick-and-place.html
+!/css/
+!/js/
+!/assets/

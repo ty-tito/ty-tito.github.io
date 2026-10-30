@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tawfiq Abu Rub — Robotics &amp; Mechanical Design</title>
+  <meta name="description" content="Portfolio of Tawfiq Abu Rub: a custom 4-DOF robot arm built end to end, from a planetary actuator to ROS 2 motion planning and a reinforcement-learning drawing policy.">
+  <meta name="theme-color" content="#0b0e12">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2a14 14 0 0 0 0 28z' fill='%23ff8a3d'/%3E%3Cpath d='M16 2a14 14 0 0 1 0 28z' fill='%235cc8ff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+
+  <!-- Inline icon set (original line icons) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-profile" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10.5" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14.5 10h3M14.5 13.5h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m4.5 7 7.5 6 7.5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4.5h5.5V10M19 5l-8 8M17 14v4.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1H10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="Profile and navigation">
+    <div class="sb-profile">
+      <div class="avatar" data-avatar>
+        <img src="assets/img/profile.jpg" alt="Portrait of Tawfiq Abu Rub" width="96" height="96">
+        <span class="avatar-initials" aria-hidden="true">TA</span>
+      </div>
+      <div class="sb-id">
+        <p class="sb-name">Tawfiq Abu Rub</p>
+        <p class="sb-role">Mechanical Engineer · MSc Robotics</p>
+      </div>
+    </div>
+
+    <p class="sb-tagline">I build robots end to end, from the gearbox to the code that moves them.</p>
+
+    <ul class="sb-meta">
+      <li><svg class="ic"><use href="#i-pin"/></svg>Manchester, UK</li>
+      <li><svg class="ic"><use href="#i-mail"/></svg><a href="mailto:ty.aburub@gmail.com">ty.aburub@gmail.com</a></li>
+    </ul>
+
+    <nav class="sb-nav" aria-label="Sections">
+      <p class="sb-label">The build</p>
+      <div class="chain-wrap">
+      <span class="chain-track" aria-hidden="true"><span class="chain-fill" data-chain-fill></span></span>
+      <ol class="chain" data-chain>
+        <li data-nav="actuator" style="--stage: var(--hw)">
+          <a href="#actuator"><span class="node">01</span><span class="chain-text"><span class="chain-title">Actuator</span><span class="chain-sub">2-stage planetary</span></span></a>
+        </li>
+        <li data-nav="arm" style="--stage: var(--hw)">
+          <a href="#arm"><span class="node">02</span><span class="chain-text"><span class="chain-title">Arm</span><span class="chain-sub">Design &amp; 3D print</span></span></a>
+        </li>
+        <li data-nav="motion" class="is-split">
+          <a href="#motion"><span class="node">03</span><span class="chain-text"><span class="chain-title">Motion</span><span class="chain-sub">Pick-and-place, sim to real</span></span></a>
+        </li>
+        <li data-nav="learning" style="--stage: var(--sim)">
+          <a href="#learning"><span class="node">04</span><span class="chain-text"><span class="chain-title">Learning</span><span class="chain-sub">RL drawing policy</span></span></a>
+        </li>
+        <li data-nav="skills" style="--stage: var(--text)">
+          <a href="#skills"><span class="node">05</span><span class="chain-text"><span class="chain-title">Skills</span><span class="chain-sub">By discipline</span></span></a>
+        </li>
+      </ol>
+      </div>
+    </nav>
+
+    <div class="sb-links">
+      <a class="btn-icon" href="https://www.linkedin.com/in/tawfiq-abu-rub-8116b5342/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-profile"/></svg>LinkedIn</a>
+      <a class="btn-icon" href="assets/docs/Tawfiq-Abu-Rub-CV.pdf" target="_blank" rel="noopener"><svg class="ic"><use href="#i-doc"/></svg>CV</a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main id="main" class="main">
+
+    <!-- ---------- INTRO ---------- -->
+    <section id="intro" class="intro" data-tint="hw">
+      <div class="intro-grid">
+        <div class="intro-copy">
+          <p class="eyebrow reveal">Robotics &amp; mechanical design portfolio</p>
+          <h1 class="reveal">One robot arm, built from the gearbox&nbsp;up.</h1>
+          <p class="lede reveal">Four projects, one machine. Each project's output is the next one's input: the actuator drives the arm, the arm's CAD becomes its robot model, and that model is planned for in ROS&nbsp;2 and trained on in MuJoCo.</p>
+        </div>
+        <div class="intro-visual reveal" aria-hidden="true">
+          <div class="gearset" data-gearset></div>
+          <p class="gear-caption">Planetary stage · sun in, carrier out</p>
+        </div>
+      </div>
+
+      <ol class="pipeline">
+        <li class="reveal">
+          <a href="#actuator" class="pipe-card">
+            <span class="pipe-thumb pipe-thumb--gear"><span class="gearset gearset--static" data-gearset="static"></span></span>
+            <span class="pipe-num">01</span>
+            <span class="pipe-title">Actuator</span>
+            <span class="pipe-sub">2-stage planetary gearbox</span>
+          </a>
+        </li>
+        <li class="reveal">
+          <a href="#arm" class="pipe-card">
+            <span class="pipe-thumb pipe-thumb--art">
+              <svg class="arm-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+                <path class="aa-ground" d="M22 101h116"/>
+                <rect class="aa-base" x="48" y="86" width="40" height="15" rx="3"/>
+                <rect class="aa-base" x="56" y="79" width="24" height="8" rx="2"/>
+                <path class="aa-link" d="M68 72 84 34 120 48 121 62"/>
+                <path class="aa-link aa-link--in" d="M68 72 84 34 120 48 121 62"/>
+                <path class="aa-grip" d="M114 68h14M115 68v8M127 68v8"/>
+                <circle class="aa-joint aa-joint--key" cx="68" cy="72" r="7"/>
+                <circle class="aa-hub" cx="68" cy="72" r="2.4"/>
+                <circle class="aa-joint aa-joint--key" cx="84" cy="34" r="7"/>
+                <circle class="aa-hub" cx="84" cy="34" r="2.4"/>
+                <circle class="aa-joint" cx="120" cy="48" r="4.5"/>
+              </svg>
+            </span>
+            <span class="pipe-num">02</span>
+            <span class="pipe-title">Arm</span>
+            <span class="pipe-sub">4-DOF design &amp; 3D print</span>
+          </a>
+        </li>
+        <li class="reveal">
+          <a href="#motion" class="pipe-card">
+            <span class="pipe-thumb pipe-thumb--art">
+              <!-- Arm over the bearing; the dashed cyan line is the planned path to the place spot -->
+              <svg class="arm-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+                <path class="aa-ground" d="M14 101h132"/>
+                <rect class="aa-base" x="26" y="86" width="40" height="15" rx="3"/>
+                <rect class="aa-base" x="34" y="79" width="24" height="8" rx="2"/>
+                <path class="aa-link" d="M46 72 64 38 98 48 99 62"/>
+                <path class="aa-link aa-link--in" d="M46 72 64 38 98 48 99 62"/>
+                <path class="aa-grip" d="M92 68h14M93 68v8M105 68v8"/>
+                <rect class="aa-obj" x="93" y="94" width="12" height="7" rx="1.5"/>
+                <rect class="aa-obj aa-obj--ghost" x="126" y="94" width="12" height="7" rx="1.5"/>
+                <path class="aa-path" d="M103 90C114 34 130 40 132 88"/>
+                <path class="aa-path-head" d="M128.5 83 132 88.5 135.5 83"/>
+                <circle class="aa-joint aa-joint--key" cx="46" cy="72" r="7"/>
+                <circle class="aa-hub" cx="46" cy="72" r="2.4"/>
+                <circle class="aa-joint aa-joint--key" cx="64" cy="38" r="7"/>
+                <circle class="aa-hub" cx="64" cy="38" r="2.4"/>
+                <circle class="aa-joint" cx="98" cy="48" r="4.5"/>
+              </svg>
+            </span>
+            <span class="pipe-num">03</span>
+            <span class="pipe-title">Motion</span>
+            <span class="pipe-sub">ROS 2 pick-and-place, sim to real</span>
+          </a>
+        </li>
+        <li class="reveal">
+          <a href="#learning" class="pipe-card">
+            <span class="pipe-thumb pipe-thumb--art">
+              <!-- Arm with a pen, part-way through drawing a star (solid = drawn, dashed = still to draw) -->
+              <svg class="arm-art arm-art--sim" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+                <path class="aa-ground" d="M10 104h140"/>
+                <path class="aa-paper" d="M72 104 136 104 150 86 86 86Z"/>
+                <path class="aa-star aa-star--todo" d="M102.6 100.3 105.6 95.8 96.8 93 108.1 92.8 112 88.5"/>
+                <path class="aa-star" d="M112 88.5 115.9 92.8 127.2 93 118.4 95.8 121.4 100.3 112 97.7 102.6 100.3"/>
+                <rect class="aa-base" x="18" y="89" width="38" height="15" rx="3"/>
+                <rect class="aa-base" x="25" y="82" width="24" height="8" rx="2"/>
+                <path class="aa-link" d="M37 75 56 40 90 52 96 74"/>
+                <path class="aa-link aa-link--in" d="M37 75 56 40 90 52 96 74"/>
+                <path class="aa-pen" d="M96 74 102.6 100.3"/>
+                <circle class="aa-pen-tip" cx="102.6" cy="100.3" r="1.8"/>
+                <circle class="aa-joint aa-joint--key" cx="37" cy="75" r="7"/>
+                <circle class="aa-hub" cx="37" cy="75" r="2.4"/>
+                <circle class="aa-joint aa-joint--key" cx="56" cy="40" r="7"/>
+                <circle class="aa-hub" cx="56" cy="40" r="2.4"/>
+                <circle class="aa-joint" cx="90" cy="52" r="4.5"/>
+              </svg>
+            </span>
+            <span class="pipe-num">04</span>
+            <span class="pipe-title">Learning</span>
+            <span class="pipe-sub">RL policy that draws</span>
+          </a>
+        </li>
+      </ol>
+
+      <div class="about">
+        <div class="about-block reveal">
+          <h2 class="label">About</h2>
+          <p>I'm doing an MSc in Robotics at the University of Manchester, where I also did my BEng in Mechanical Engineering. Outside the course I design robots in SolidWorks, print and wire them myself, and write the software that runs them, from ROS&nbsp;2 motion planning to reinforcement learning.</p>
+        </div>
+        <div class="about-block reveal">
+          <h2 class="label">Career objective</h2>
+          <p>After the MSc I'm looking for a robotics role in industry, ideally one that covers both the hardware and the software that controls it.</p>
+          <p class="interests"><span>Interests</span> Mechanical design · Sim-to-real transfer · Motion planning · Learning-based control</p>
+        </div>
+      </div>
+
+      <div class="intro-links">
+        <a class="btn-icon" href="https://www.linkedin.com/in/tawfiq-abu-rub-8116b5342/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-profile"/></svg>LinkedIn</a>
+        <a class="btn-icon" href="assets/docs/Tawfiq-Abu-Rub-CV.pdf" target="_blank" rel="noopener"><svg class="ic"><use href="#i-doc"/></svg>CV</a>
+        <a class="btn-icon" href="mailto:ty.aburub@gmail.com"><svg class="ic"><use href="#i-mail"/></svg>Email</a>
+      </div>
+    </section>
+
+    <!-- ---------- THE JOURNEY (projects joined by a single spine) ---------- -->
+    <div class="journey" data-journey>
+      <div class="spine" aria-hidden="true"><span class="spine-fill" data-spine-fill></span><span class="spine-head" data-spine-head></span></div>
+
+      <!-- ===== 01 · ACTUATOR ===== -->
+      <section id="actuator" class="project" data-tint="hw" aria-labelledby="actuator-title">
+        <header class="project-head">
+          <span class="stage-node" style="--stage: var(--hw)" aria-hidden="true">01</span>
+          <p class="eyebrow badge reveal">Hardware</p>
+          <h2 id="actuator-title" class="reveal"><span class="hl">Two-stage planetary actuator</span></h2>
+          <p class="project-sub reveal">SolidWorks · Gearbox design · 3D printing</p>
+        </header>
+
+        <!-- Scroll scrubs the exploded-view animation; without JS or with reduced motion the exploded still shows -->
+        <figure class="explode" data-explode data-src="assets/img/gearbox/g{n}.webp" data-frames="181">
+          <div class="explode-track">
+            <div class="explode-stage">
+              <div class="pane pane--cad explode-pane">
+                <span class="pane-label pane-label--dark">CAD · Exploded assembly</span>
+                <img class="explode-still" src="assets/img/gearbox/g180.webp" width="1280" height="640" alt="Exploded view of the two-stage planetary gearbox: bolts, output flange, planet carriers with their planet gears, the ring-gear housing and the input pinion">
+                <canvas class="explode-canvas" width="1280" height="640" role="img" aria-label="The two-stage planetary gearbox, coming apart into its flange, planet carriers, ring-gear housing and input pinion as the page scrolls"></canvas>
+              </div>
+              <div class="explode-meter" aria-hidden="true"><span></span></div>
+              <figcaption class="explode-foot">
+                <span>The 25:1 two-stage planetary gearbox, exploded.</span>
+                <span class="explode-hint" aria-hidden="true">Keep scrolling to take it apart</span>
+              </figcaption>
+            </div>
+          </div>
+        </figure>
+
+        <div class="detail-grid">
+          <ul class="bullets reveal">
+            <li>Custom-designed 25:1 two-stage planetary gearbox, 3D printed and driven by a NEMA stepper motor.</li>
+            <li>Designed for minimal backlash, producing 9.6&nbsp;Nm at 55% efficiency.</li>
+          </ul>
+          <div class="stats reveal">
+            <div class="stat"><p class="stat-num">25:1</p><p class="stat-label">Reduction over two planetary stages</p></div>
+            <div class="stat"><p class="stat-num">9.6 Nm</p><p class="stat-label">Output torque</p></div>
+            <div class="stat"><p class="stat-num">55%</p><p class="stat-label">Efficiency</p></div>
+            <div class="stat"><p class="stat-num">J2 + J3</p><p class="stat-label">Drives the arm's shoulder and elbow joints</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="handoff reveal" aria-label="How project 01 feeds into project 02">
+        <span class="handoff-dot" aria-hidden="true"></span>
+        <p class="handoff-kicker">Feeds into 02</p>
+        <p class="handoff-text"><span>25:1 planetary actuator</span><svg class="ic"><use href="#i-arrow"/></svg><span>the arm's shoulder and elbow (J2, J3)</span></p>
+      </div>
+
+      <!-- ===== 02 · ARM ===== -->
+      <section id="arm" class="project" data-tint="hw" aria-labelledby="arm-title">
+        <header class="project-head">
+          <span class="stage-node" style="--stage: var(--hw)" aria-hidden="true">02</span>
+          <p class="eyebrow badge reveal">Hardware</p>
+          <h2 id="arm-title" class="reveal"><span class="hl">4-DOF robotic arm: design &amp; 3D&nbsp;print</span></h2>
+          <p class="project-sub reveal">SolidWorks · DFMA · 3D printing · Steppers &amp; ESP32-S3</p>
+        </header>
+
+        <!-- The SolidWorks model with the arm's specs beside it -->
+        <div class="split split--arm">
+          <figure class="arm-figure reveal">
+            <div class="pane pane--cad">
+              <span class="pane-label pane-label--dark">CAD · SolidWorks assembly</span>
+              <img src="assets/img/arm-cad.jpg" width="544" height="816" loading="lazy" alt="SolidWorks render of the 4-DOF arm standing upright: base stepper and turntable, the shoulder and elbow gearbox housings, the wrist stepper and the gripper at the top">
+            </div>
+          </figure>
+
+          <div class="arm-text">
+            <ul class="bullets reveal">
+              <li>4-DOF arm driven through pulleys and 3D-printed actuators, designed in SolidWorks.</li>
+            </ul>
+            <div class="stats reveal">
+              <div class="stat"><p class="stat-num">310 mm</p><p class="stat-label">Reach</p></div>
+              <div class="stat"><p class="stat-num">4 + 1</p><p class="stat-label">Joints plus an actuated gripper</p></div>
+              <div class="stat"><p class="stat-num">ESP32-S3</p><p class="stat-label">Custom firmware driving four steppers and a servo</p></div>
+            </div>
+            <table class="joints reveal">
+              <caption class="label">Joint layout</caption>
+              <thead><tr><th scope="col">Joint</th><th scope="col">Motion</th><th scope="col">Reduction</th></tr></thead>
+              <tbody>
+                <tr><td>J1</td><td>Base yaw</td><td>4:1</td></tr>
+                <tr><td>J2</td><td>Shoulder pitch</td><td>25:1 planetary</td></tr>
+                <tr><td>J3</td><td>Elbow pitch</td><td>25:1 planetary</td></tr>
+                <tr><td>J4</td><td>Wrist pitch</td><td>6:1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="handoff handoff--split reveal" aria-label="How project 02 feeds into project 03">
+        <span class="handoff-dot" aria-hidden="true"></span>
+        <p class="handoff-kicker">Feeds into 03</p>
+        <p class="handoff-text"><span>SolidWorks assembly</span><svg class="ic"><use href="#i-arrow"/></svg><span>URDF robot model for MoveIt&nbsp;2</span></p>
+      </div>
+
+      <!-- ===== 03 · MOTION ===== -->
+      <section id="motion" class="project" data-tint="mix" aria-labelledby="motion-title">
+        <header class="project-head">
+          <span class="stage-node stage-node--split" aria-hidden="true">03</span>
+          <p class="eyebrow badge badge--split reveal"><span class="hw">Hardware</span> + <span class="sim">Simulation</span></p>
+          <h2 id="motion-title" class="reveal"><span class="hl">Pick-and-place, from simulation to hardware</span></h2>
+          <p class="project-sub reveal">ROS 2 Jazzy · MoveIt 2 · ESP32-S3</p>
+        </header>
+
+        <div class="split">
+          <figure class="compare compare--portrait reveal" data-sync>
+            <div class="compare-panes">
+              <div class="pane" data-kind="hw">
+                <span class="pane-label"><i></i>Hardware</span>
+                <video src="assets/video/pnp-real.mp4" poster="assets/img/pnp-real-poster.jpg" muted playsinline controls preload="metadata" aria-label="The physical arm picking up a ball bearing and placing it"></video>
+              </div>
+              <div class="pane pane--wide" data-kind="sim">
+                <span class="pane-label"><i></i>Simulation · RViz 2</span>
+                <video src="assets/video/pnp-sim.mp4" poster="assets/img/pnp-sim-poster.jpg" muted playsinline controls preload="metadata" aria-label="The same pick-and-place cycle in the RViz simulation"></video>
+              </div>
+            </div>
+            <div class="sync-bar">
+              <button class="sync-toggle" type="button" data-sync-toggle aria-label="Play both videos">
+                <svg class="ic ic-play"><use href="#i-play"/></svg><svg class="ic ic-pause"><use href="#i-pause"/></svg>
+              </button>
+              <input class="sync-scrub" type="range" min="0" max="1000" value="0" step="1" data-sync-scrub aria-label="Seek both videos">
+            </div>
+            <figcaption>One MoveIt 2 plan driving both. The sim clip holds between moves so the two stay in step.</figcaption>
+          </figure>
+
+          <div class="project-text">
+            <ul class="bullets reveal">
+              <li>Built a ROS 2 and MoveIt 2 inverse-kinematics pick-and-place motion planning pipeline for a custom 4-DOF 3D-printed arm, using the arm's URDF model, TF2 frames and RViz simulation.</li>
+              <li>Deployed the pipeline sim-to-real on hardware, deriving per-joint velocity limits from bench speed sweeps and applying Ruckig jerk-limited smoothing for continuous-acceleration (S-curve) motion.</li>
+            </ul>
+            <div class="stats stats--stack reveal">
+              <div class="stat"><p class="stat-num">~10/s <span class="to">→</span> &lt;1/s</p><p class="stat-label">Over-limit jerk events after Ruckig smoothing</p></div>
+              <div class="stat"><p class="stat-num">1×10<sup>−15</sup> m</p><p class="stat-label">Closed-form IK agreement with an independent MuJoCo model</p></div>
+              <div class="stat"><p class="stat-num">32.4 <span class="to">→</span> 48.0 s</p><p class="stat-label">Physical cycle after halving one joint's planner limit. Only that joint's moves got longer</p></div>
+            </div>
+            <div class="project-links reveal">
+              <a class="btn" href="pick-and-place.html"><svg class="ic"><use href="#i-doc"/></svg>Read the technical write-up</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Architecture: one plan, two backends -->
+        <figure class="arch reveal" aria-labelledby="arch-title">
+          <figcaption class="arch-head">
+            <p class="label" id="arch-title">System architecture</p>
+            <p class="arch-claim">One plan, two interchangeable backends. Swapping simulation for hardware is a launch-file change, not a code change.</p>
+          </figcaption>
+          <ol class="arch-flow">
+            <li><span class="arch-k">CAD</span><span class="arch-v">SolidWorks</span></li>
+            <li><span class="arch-k">Model</span><span class="arch-v">URDF · SRDF · TF2</span></li>
+            <li class="arch-core">
+              <span class="arch-k">MoveIt 2</span>
+              <span class="arch-v">OMPL RRTConnect <em>→</em> TOTG <em>→</em> Ruckig</span>
+            </li>
+            <li><span class="arch-k">Interface</span><span class="arch-v">FollowJointTrajectory + GripperCommand</span></li>
+          </ol>
+          <div class="arch-fork">
+            <div class="lane" data-kind="sim">
+              <span class="lane-name"><i></i>Simulation</span>
+              <ol><li>arm_fake_driver</li><li>/joint_states</li><li>RViz 2</li></ol>
+            </div>
+            <div class="lane" data-kind="hw">
+              <span class="lane-name"><i></i>Hardware</span>
+              <ol><li>traj_driver</li><li>Framed serial</li><li>ESP32-S3 trajectory buffer</li><li>4 steppers + servo</li></ol>
+            </div>
+          </div>
+        </figure>
+
+        <ul class="tags reveal" aria-label="Tools used">
+          <li>ROS 2</li><li>MoveIt 2</li><li>OMPL</li><li>Ruckig</li><li>URDF / SRDF</li><li>TF2</li><li>RViz 2</li><li>Python</li><li>C++</li><li>ESP32-S3</li>
+        </ul>
+      </section>
+
+      <div class="handoff reveal" style="--to: var(--sim)" aria-label="How project 03 feeds into project 04">
+        <span class="handoff-dot" aria-hidden="true"></span>
+        <p class="handoff-kicker">Feeds into 04</p>
+        <p class="handoff-text"><span>Same arm, same URDF</span><svg class="ic"><use href="#i-arrow"/></svg><span>MuJoCo training environment</span></p>
+      </div>
+
+      <!-- ===== 04 · LEARNING ===== -->
+      <section id="learning" class="project" data-tint="sim" aria-labelledby="learning-title">
+        <header class="project-head">
+          <span class="stage-node" style="--stage: var(--sim)" aria-hidden="true">04</span>
+          <p class="eyebrow badge reveal">Simulation</p>
+          <h2 id="learning-title" class="reveal"><span class="hl">Teaching the arm to draw with reinforcement learning</span></h2>
+          <p class="project-sub reveal">PPO · MuJoCo · Python</p>
+        </header>
+
+        <div class="shape-tabs reveal" role="tablist" aria-label="Target shape" data-tabs>
+          <button role="tab" id="tab-circle" aria-controls="rl-panel" aria-selected="true" tabindex="0"
+            data-video="assets/video/rl-circle.mp4" data-poster="assets/img/rl-circle-poster.jpg" data-plot="assets/img/rl-circle-plot.png" data-name="circle">Circle</button>
+          <button role="tab" id="tab-figure8" aria-controls="rl-panel" aria-selected="false" tabindex="-1"
+            data-video="assets/video/rl-figure8.mp4" data-poster="assets/img/rl-figure8-poster.jpg" data-plot="assets/img/rl-figure8-plot.png" data-name="figure-eight">Figure-eight</button>
+          <button role="tab" id="tab-star" aria-controls="rl-panel" aria-selected="false" tabindex="-1"
+            data-video="assets/video/rl-star.mp4" data-poster="assets/img/rl-star-poster.jpg" data-plot="assets/img/rl-star-plot.png" data-name="star">Star</button>
+        </div>
+
+        <figure id="rl-panel" class="compare compare--rl reveal" role="tabpanel" aria-labelledby="tab-circle">
+          <div class="compare-panes">
+            <div class="pane" data-kind="sim">
+              <span class="pane-label"><i></i>Policy rollout · MuJoCo</span>
+              <video data-autoplay data-rl-video src="assets/video/rl-circle.mp4" poster="assets/img/rl-circle-poster.jpg" muted loop playsinline controls preload="metadata" aria-label="The simulated arm drawing the target shape with a pen"></video>
+              <button class="pane-toggle" type="button" data-video-toggle aria-label="Play video">
+                <svg class="ic ic-play"><use href="#i-play"/></svg><svg class="ic ic-pause"><use href="#i-pause"/></svg>
+              </button>
+            </div>
+            <div class="pane pane--paper">
+              <span class="pane-label pane-label--dark">Commanded vs actual pen path</span>
+              <img data-rl-plot src="assets/img/rl-circle-plot.png" alt="Plot of commanded and actual pen path for the circle: the two lines overlap almost exactly after the pen reaches the start point" loading="lazy">
+            </div>
+          </div>
+          <figcaption>Blue is the commanded path, red is where the pen actually went. The red tail is the approach from the arm's start pose.</figcaption>
+        </figure>
+
+        <div class="detail-grid">
+          <ul class="bullets reveal">
+            <li>Trained a PPO reinforcement-learning policy in MuJoCo to guide the pen tip of a custom 4-DOF arm along target paths. It reached sub-millimetre (0.5–0.9 mm) mean tracking error and handled shapes it never saw in training with no retraining.</li>
+            <li>Built a MuJoCo model of the arm from its SolidWorks URDF, then used domain randomisation, curriculum learning and multi-scale reward shaping to cut tracking error from ~30 mm to 0.55 mm over 23 training iterations.</li>
+          </ul>
+          <div class="stats reveal">
+            <div class="stat"><p class="stat-num">0.5–0.9 mm</p><p class="stat-label">Mean tracking error</p></div>
+            <div class="stat"><p class="stat-num">~30 <span class="to">→</span> 0.55 mm</p><p class="stat-label">Tracking error across 23 training iterations</p></div>
+            <div class="stat"><p class="stat-num">0</p><p class="stat-label">Retraining needed for unseen shapes</p></div>
+          </div>
+        </div>
+
+        <ul class="tags reveal" aria-label="Tools used">
+          <li>PPO</li><li>MuJoCo</li><li>Domain randomisation</li><li>Curriculum learning</li><li>Reward shaping</li><li>URDF</li><li>Python</li>
+        </ul>
+      </section>
+
+      <div class="handoff reveal" style="--to: var(--text-2)" aria-label="Summary of the four projects">
+        <span class="handoff-dot" aria-hidden="true"></span>
+        <p class="handoff-kicker">Four projects</p>
+        <p class="handoff-text"><span>Gearbox to learned motion</span><svg class="ic"><use href="#i-arrow"/></svg><span>the skills behind it</span></p>
+      </div>
+
+      <!-- ===== 05 · SKILLS ===== -->
+      <section id="skills" class="skills" data-tint="neutral" aria-labelledby="skills-title">
+        <header class="project-head">
+          <span class="stage-node" style="--stage: var(--text)" aria-hidden="true">05</span>
+          <p class="eyebrow badge reveal">All four projects</p>
+          <h2 id="skills-title" class="reveal"><span class="hl">Skills</span></h2>
+          <p class="project-sub reveal">Grouped by discipline, with the projects that use them.</p>
+        </header>
+
+        <div class="skill-grid">
+          <article class="skill-card reveal">
+            <header><h3>Mechanical design &amp; analysis</h3><span class="used">01 · 02</span></header>
+            <ul class="tags">
+              <li>SolidWorks</li><li>Engineering drawings</li><li>FEA</li><li>Abaqus</li><li>STAR-CCM+</li><li>DFMA</li><li>FMEA</li><li>3D printing</li><li>CNC simulation</li>
+            </ul>
+          </article>
+          <article class="skill-card reveal">
+            <header><h3>Robotics &amp; motion planning</h3><span class="used">03 · 04</span></header>
+            <ul class="tags">
+              <li>ROS 2 (Jazzy)</li><li>MoveIt 2</li><li>OMPL · RRTConnect, RRT*</li><li>Inverse kinematics</li><li>Trajectory time-parameterisation</li><li>Jerk-limited motion (Ruckig)</li><li>URDF / xacro / SRDF</li><li>TF2</li><li>RViz 2</li><li>Collision checking</li><li>Sim-to-real transfer</li>
+            </ul>
+          </article>
+          <article class="skill-card reveal">
+            <header><h3>Reinforcement learning &amp; simulation</h3><span class="used">04</span></header>
+            <ul class="tags">
+              <li>PPO</li><li>MuJoCo</li><li>Domain randomisation</li><li>Curriculum learning</li><li>Reward shaping</li><li>PyBullet</li>
+            </ul>
+          </article>
+          <article class="skill-card reveal">
+            <header><h3>Embedded &amp; electronics</h3><span class="used">03</span></header>
+            <ul class="tags">
+              <li>ESP32-S3</li><li>Arduino</li><li>Stepper motor control</li><li>PWM</li><li>Serial protocol design</li><li>Bench testing</li><li>Soldering</li>
+            </ul>
+          </article>
+          <article class="skill-card reveal">
+            <header><h3>Programming</h3><span class="used">03 · 04</span></header>
+            <ul class="tags">
+              <li>Python</li><li>C++</li><li>MATLAB</li><li>OpenCV</li><li>rclpy</li><li>colcon / ament</li>
+            </ul>
+          </article>
+          <article class="skill-card reveal">
+            <header><h3>Project delivery</h3></header>
+            <ul class="tags">
+              <li>Project management</li><li>Gantt charts</li><li>Microsoft Office</li>
+            </ul>
+            <p class="langs"><span class="label">Languages</span> English (fluent) · Arabic (fluent)</p>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- ---------- CONTACT / FOOTER ---------- -->
+    <footer class="contact" id="contact">
+      <div class="contact-main reveal">
+        <h2><span class="hl">Let's talk robots.</span></h2>
+        <a class="contact-mail" href="mailto:ty.aburub@gmail.com">ty.aburub@gmail.com</a>
+        <div class="contact-links">
+          <a class="btn" href="https://www.linkedin.com/in/tawfiq-abu-rub-8116b5342/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-profile"/></svg>LinkedIn</a>
+          <a class="btn" href="assets/docs/Tawfiq-Abu-Rub-CV.pdf" download="Tawfiq-Abu-Rub-CV.pdf"><svg class="ic"><use href="#i-doc"/></svg>Download CV</a>
+        </div>
+      </div>
+      <div class="credits">
+        <p><strong>Acknowledgements.</strong> All project photographs, CAD models, renders, videos and plots on this site are my own work. Typefaces: Space Grotesk and IBM Plex, used under the SIL Open Font License via Google Fonts. ROS, MoveIt, MuJoCo, SolidWorks and other product names are trademarks of their respective owners.</p>
+        <p>© <span data-year>2026</span> Tawfiq Abu Rub</p>
+      </div>
+      <p class="credits-note">Website built with help from Claude, Anthropic's AI assistant.</p>
+    </footer>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
