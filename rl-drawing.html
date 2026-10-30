@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" style="--tint: #5cc8ff; --tint-2: #5cc8ff">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teaching the arm to draw: training report · Tawfiq Abu Rub</title>
+  <meta name="description" content="Training report for a PPO reinforcement-learning policy that draws with a custom 4-DOF arm in MuJoCo, trained on a figure-eight and tested on shapes it never saw.">
+  <meta name="theme-color" content="#0b0e12">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2a14 14 0 0 0 0 28z' fill='%23ff8a3d'/%3E%3Cpath d='M16 2a14 14 0 0 1 0 28z' fill='%235cc8ff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#doc">Skip to content</a>
+
+  <header class="doc-bar">
+    <a class="doc-back" href="index.html#learning"><svg class="ic"><use href="#i-arrow"/></svg>Back to the portfolio</a>
+    <span class="doc-who">Tawfiq Abu Rub</span>
+  </header>
+
+  <main id="doc" class="doc doc--sim">
+    <header>
+      <p class="eyebrow badge">Simulation</p>
+      <h1><span class="hl">Teaching a 4&#8209;DOF arm to draw with reinforcement learning</span></h1>
+      <p class="doc-meta">Training report · PPO · MuJoCo · Stable-Baselines3</p>
+    </header>
+
+    <div class="doc-summary">
+      <ul class="bullets">
+        <li>Trained a PPO reinforcement-learning policy in MuJoCo to guide the pen tip of a custom 4-DOF arm along target paths. It reached sub-millimetre (0.5–0.9 mm) mean tracking error and handled shapes it never saw in training with no retraining.</li>
+        <li>Built a MuJoCo model of the arm from its SolidWorks URDF, then used domain randomisation, curriculum learning and multi-scale reward shaping to cut tracking error from ~30 mm to 0.55 mm over 23 training iterations.</li>
+      </ul>
+    </div>
+
+    <p>I trained the policy on one shape only, a figure-eight. In the MuJoCo model of the arm it draws that figure-eight, a circle and a five-point star, all with under 1 mm of average error. It stays inside the real arm's joint speed limits and posture limits, and its commands change smoothly from one tick to the next. That last part matters because every command goes straight to stepper motors. This report covers the final model, version 23, and how I got there.</p>
+
+    <figure class="doc-figure">
+      <div class="doc-plots">
+        <div class="pane pane--paper">
+          <span class="pane-label pane-label--dark">Figure-eight · trained on</span>
+          <img src="assets/img/rl-figure8-plot.png" alt="Commanded and actual pen path for the figure-eight: the two lines overlap almost exactly" loading="lazy">
+        </div>
+        <div class="pane pane--paper">
+          <span class="pane-label pane-label--dark">Circle · never seen</span>
+          <img src="assets/img/rl-circle-plot.png" alt="Commanded and actual pen path for the circle: the two lines overlap almost exactly after the pen reaches the start point" loading="lazy">
+        </div>
+        <div class="pane pane--paper">
+          <span class="pane-label pane-label--dark">Star · never seen</span>
+          <img src="assets/img/rl-star-plot.png" alt="Commanded and actual pen path for the star: the lines overlap closely, with the largest gaps at the corners" loading="lazy">
+        </div>
+      </div>
+      <figcaption>Blue is the target path, red is where the pen actually went. The red tail at the start is the move from the rest pose onto the path.</figcaption>
+    </figure>
+
+    <h2 id="results">Results</h2>
+    <p>I measured these at the setting the arm will actually use: each shape at 0.9× size, with the paper 5 mm closer to the base.</p>
+    <div class="table-scroll">
+      <table class="doc-table">
+        <thead><tr><th scope="col">Shape</th><th scope="col">Seen in training</th><th scope="col">Average error</th><th scope="col">Worst error</th><th scope="col">Mean jerk</th></tr></thead>
+        <tbody>
+          <tr><td>Figure-eight</td><td>Yes</td><td>0.52 mm</td><td>1.72 mm</td><td>0.019</td></tr>
+          <tr><td>Circle</td><td>No</td><td>0.71 mm</td><td>1.52 mm</td><td>0.012</td></tr>
+          <tr><td>Star</td><td>No</td><td>0.85 mm</td><td>2.62 mm</td><td>0.010</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="bullets">
+      <li>All runs are in MuJoCo with the policy deterministic and both posture limits on.</li>
+      <li>The errors leave out the first second, which is the move from rest onto the path.</li>
+      <li>Mean jerk is the average size of the change in the four-joint command from one tick to the next. Each command sits between −1 and 1.</li>
+      <li>At full size with the paper in its default position, the figure-eight averages 0.80 mm (worst 3.98 mm).</li>
+      <li>The pen stays about 4° from vertical on average.</li>
+      <li>For comparison, v4 was the first version to draw all three shapes, and it averaged 2.3 mm on the figure-eight. v13, which the final training chain started from, averaged 1.74 mm with a mean jerk of 0.056.</li>
+    </ul>
+
+    <h2 id="system">How the system works</h2>
+
+    <h3>The digital twin</h3>
+    <p>The MuJoCo model (<code>robot/arm.xml</code>) is built from the arm's SolidWorks URDF and meshes. I added the details that affect where the pen ends up: the measured pen offset from the wrist joint (35.25, 88.75, −75.76 mm), the 5 mm mounting platform, the 2.5 mm lift from the bearing under the first link, and the measured link masses. Physics runs at 200 Hz and the policy acts at 20 Hz, once every 50 ms.</p>
+
+    <h3>What the policy sees</h3>
+    <p>Each tick it gets 23 numbers: the four joint angles (with 5 mrad of noise added), the four joint velocities, the pen-tip position, and the target point now and 0.2, 0.5 and 1.0 s ahead. It is never told the time or which shape it's drawing.</p>
+
+    <h3>What it controls</h3>
+    <p>The output is four numbers between −1 and 1, one per joint. Each is scaled to the biggest step that joint can make in one tick:</p>
+    <div class="table-scroll">
+      <table class="doc-table">
+        <thead><tr><th scope="col">Joint</th><th scope="col">Top speed</th></tr></thead>
+        <tbody>
+          <tr><td>Base</td><td>100.8°/s</td></tr>
+          <tr><td>Shoulder</td><td>48.1°/s</td></tr>
+          <tr><td>Elbow</td><td>63.0°/s</td></tr>
+          <tr><td>Wrist</td><td>135.2°/s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>These are the firmware's step rates minus 10%, so the policy can never plan a move the steppers can't make. Each step is added to the current command, then clipped to the joint limits and to two posture limits:</p>
+    <ul class="bullets">
+      <li><strong>Shoulder ≤ 90°</strong>, which keeps the arm clear of its base.</li>
+      <li><strong>Shoulder + elbow ≤ 180°</strong>, which keeps the wrist angle that holds the pen vertical, <code>−90° − (shoulder + elbow)</code>, inside the wrist's −270° to −90° range.</li>
+    </ul>
+
+    <h3>The network</h3>
+    <p>It's Stable-Baselines3 PPO with the default MLP, two hidden layers of 64. Inputs are normalised with running statistics saved in <code>vecnormalize.pkl</code>, and the policy needs that file at run time.</p>
+
+    <h3>Running it on the arm</h3>
+    <p><code>deploy_to_arm.py</code> rebuilds the same environment with both posture limits and runs the same 20 Hz loop. The steppers have no position feedback, so MuJoCo is only used for forward kinematics on the commanded pose. Each tick the script sends <code>&lt;base, shoulder, −elbow, wrist + 270, gripper&gt;</code> over serial to the ESP32-S3.</p>
+
+    <h2 id="training">How I trained it</h2>
+    <p>Training ran in three stages. Each one started from the previous stage's weights and normalisation statistics, and all three used the figure-eight only.</p>
+    <div class="table-scroll">
+      <table class="doc-table">
+        <thead><tr><th scope="col">Stage</th><th scope="col">Training</th><th scope="col">Starts from</th><th scope="col">What it adds</th></tr></thead>
+        <tbody>
+          <tr><td>v13</td><td>5.5M steps, learning rate 3×10<sup>−4</sup>, 8 parallel environments</td><td>Scratch</td><td>Learns to draw, with the reward terms switched on in stages</td></tr>
+          <tr><td>v21</td><td>+1M steps (best checkpoint at step 6,285,024)</td><td>v13</td><td>Both posture limits</td></tr>
+          <tr><td>v23</td><td>+500k steps at learning rate 1×10<sup>−4</sup> (best checkpoint at step 6,745,024)</td><td>v21's best checkpoint</td><td>A penalty on how much the command changes between ticks</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The reward</h3>
+    <p>Per tick, with <em>e</em> as the distance from pen to target and <em>z</em> as the pen's height (both in metres). By v23 every term is at full strength.</p>
+    <ul class="bullets">
+      <li><strong>Tracking:</strong> <code>−50e + 5·exp(−e/25 mm) + 10·exp(−e/3 mm) + 15·exp(−e/0.5 mm)</code>, plus 5 whenever <em>e</em> &lt; 1 mm. The linear term pulls the pen in from far away, and each exponential tightens the pull at a finer scale. That's what gets the error under a millimetre.</li>
+      <li><strong>Pen height:</strong> <code>−1000·|z| + 2·exp(−|z|/1 mm)</code>.</li>
+      <li><strong>Wrist:</strong> a bonus of <code>5·exp(−|J4 − (−90° − J2 − J3)| / 0.05 rad)</code> for holding the angle that keeps the pen vertical (J2, J3 and J4 are the shoulder, elbow and wrist angles), and a penalty of <code>−8·(p_z + 1)²</code> on any tilt of the pen axis <em>p</em>.</li>
+      <li><strong>Table:</strong> <code>−1000·d − 100,000·d²</code> when the pen tip is a distance <em>d</em> below the table top.</li>
+      <li><strong>Effort:</strong> <code>−5·|a|²</code>, where <em>a</em> is the four-joint command.</li>
+      <li><strong>Smoothness</strong> (added in v23): <code>−λ·|aₜ − aₜ₋₁|²</code>, where <em>aₜ</em> is the command at tick <em>t</em>.</li>
+    </ul>
+
+    <h3>Bringing the reward terms in gradually</h3>
+    <p>In v13 I ramped some terms up over a window of training steps:</p>
+    <div class="table-scroll">
+      <table class="doc-table">
+        <thead><tr><th scope="col">Term</th><th scope="col">Ramped up over</th></tr></thead>
+        <tbody>
+          <tr><td>Wrist bonus</td><td>1–2M steps</td></tr>
+          <tr><td>Height terms</td><td>2–3M steps</td></tr>
+          <tr><td>Table penalty (to full strength)</td><td>4–5M steps</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>In earlier runs, turning the height and table penalties on from the start pushed the policy away from the paper altogether. Bringing them in later lets it learn to track first.</p>
+
+    <h3>What v23 changed</h3>
+    <p>The effort term only charges for large commands, so the policy could still flip between small ones every tick. v23 charges for the change itself. Measured on the figure-eight at 0.9×, with both posture limits on and each run's best checkpoint:</p>
+    <div class="table-scroll">
+      <table class="doc-table">
+        <thead><tr><th scope="col"></th><th scope="col">v21</th><th scope="col">v23</th></tr></thead>
+        <tbody>
+          <tr><td>Shoulder command change per tick</td><td>0.070</td><td>0.007</td></tr>
+          <tr><td>Mean jerk, all four joints</td><td>0.089</td><td>0.021</td></tr>
+          <tr><td>Average error</td><td>0.80 mm</td><td>0.55 mm</td></tr>
+          <tr><td>Worst error</td><td>1.84 mm</td><td>1.58 mm</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>v23 came out both smoother and more accurate, so the jitter hadn't been helping accuracy at all. I also tried raising the effort weight instead (v22, from 5 to 7.5). That improved the error by about as much, but the commands weren't any smoother: its jerk was 0.093. Smoothness matters on the hardware because each 50 ms command goes straight to the steppers, and a command that reverses every tick makes the motors reverse every tick.</p>
+
+    <h2 id="generalisation">Why it works on shapes it never saw</h2>
+    <ul class="bullets">
+      <li><strong>It reacts to where things are, not to time.</strong> The inputs describe the pen and the next stretch of path the same way whatever the shape, so the policy learned a general rule for moving toward the path. It doesn't replay a sequence of figure-eight moves.</li>
+      <li><strong>The figure-eight already contains the bends the other shapes need.</strong> It turns left for half of each lap and right for the other half. Across the training sizes its bends range from a 13 mm radius to dead straight, at pen speeds of 22–71 mm/s. The test circle (36 mm radius, 22.6 mm/s) sits inside that range. The star's edges are straight and slower (15.8 mm/s) than anything in training.</li>
+      <li><strong>Randomisation stops it memorising anything else.</strong> Every episode starts at a random point on the curve, moves the paper 0–40 mm further from the base, scales the shape 0.8–1.2×, varies link masses by ±10% and joint friction by ±20%, and adds noise to the joint readings.</li>
+      <li><strong>It copes with places it never visited.</strong> Part of the test circle is 29 mm from the nearest target seen in training. Where the circle is more than 15 mm from any training target, the error is actually lower than on the rest of the lap: 0.26 mm average, 0.41 mm worst.</li>
+      <li><strong>The look-ahead handles the one new feature, corners.</strong> On the star, the 0.2 s look-ahead point is about 3 mm ahead, so each corner shows up in the inputs before the pen gets there. Corners are still the hardest part: all 20 of the star's largest errors are within 2.4 mm of a corner, and the worst one (2.62 mm) is right at one.</li>
+    </ul>
+
+    <h2 id="open-items">Still to do</h2>
+    <ul class="bullets">
+      <li><strong>It hasn't drawn on paper yet.</strong> A dry run of <code>deploy_to_arm.py</code> with v23 (both posture limits, 0.9× size, paper centre 300 mm from the base) held 20 Hz for 120 ticks with no overruns and no dropped serial frames. I don't have an ink-on-paper result yet.</li>
+      <li><strong>Full size doesn't fit inside the posture limits.</strong> With the limits on, the pen can reach 245–330 mm from the base, but the full-size figure-eight goes out to 340 mm. That's why the arm draws at 0.9× size with the paper 5 mm closer.</li>
+      <li><strong>I didn't record the smoothness weight λ.</strong> It was passed in as <code>--action-rate-lambda</code>, but the logs don't keep its value. I need to record it before any retraining.</li>
+      <li><strong>There's no position feedback.</strong> The arm has no encoders, so if a stepper misses steps on the real arm, nothing will notice.</li>
+    </ul>
+
+    <footer class="doc-foot">
+      <a class="btn" href="index.html#learning"><svg class="ic"><use href="#i-arrow"/></svg>Back to the portfolio</a>
+      <p>Tawfiq Abu Rub · <a href="mailto:ty.aburub@gmail.com">ty.aburub@gmail.com</a></p>
+    </footer>
+  </main>
+</body>
+</html>

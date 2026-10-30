@@ -1094,11 +1094,17 @@ a[aria-disabled="true"]:hover { border-color: var(--line-2); background: transpa
 .doc h2 + p, .doc h3 + p { margin-top: 12px; }
 .doc > .bullets, .doc .doc-steps { margin-top: 18px; max-width: 68ch; }
 .doc strong { color: var(--text); font-weight: 600; }
-.doc code { padding: 1px 5px; border-radius: 4px; background: var(--surface-2); font: 400 0.88em/1 var(--font-mono); color: var(--text); }
+.doc code { padding: 1px 5px; border-radius: 4px; background: var(--surface-2); font-family: var(--font-mono); font-size: 0.88em; color: var(--text); }
 .doc .arch { margin-top: 32px; }
 .doc-steps { padding-left: 22px; display: grid; gap: 8px; }
 .doc-steps li { padding-left: 4px; font-size: 16.5px; line-height: 1.6; color: var(--text-2); }
-.doc-steps li::marker { color: var(--hw); font: 600 14px var(--font-mono); }
+.doc-steps li::marker { color: var(--acc); font: 600 14px var(--font-mono); }
+.doc--sim { --acc: var(--sim); --hl-pa: 52%; }
+.doc em { font-style: italic; color: var(--text); }
+.doc-figure { margin: 32px 0 0; }
+.doc-plots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.doc-plots .pane { aspect-ratio: 1; }
+.doc-figure figcaption { margin-top: 12px; font-size: 13.5px; line-height: 1.5; color: var(--text-3); }
 
 .table-scroll { margin-top: 18px; overflow-x: auto; }
 .doc-table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 15px; line-height: 1.5; }
