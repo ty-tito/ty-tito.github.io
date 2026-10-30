@@ -383,7 +383,7 @@ a[aria-disabled="true"]:hover { border-color: var(--line-2); background: transpa
 /* Pipeline overview */
 .pipeline {
   list-style: none;
-  margin: 64px 0 0;
+  margin: 44px 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -457,14 +457,17 @@ a[aria-disabled="true"]:hover { border-color: var(--line-2); background: transpa
 .pipe-sub { font-size: 13px; line-height: 1.45; color: var(--text-3); }
 
 /* About */
+/* About sits directly under the "Project Portfolio" title */
 .about {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  margin-top: 64px;
-  padding-top: 32px;
-  border-top: 1px solid var(--line);
+  grid-template-columns: 1fr;
+  gap: 26px;
+  margin-top: 36px;
 }
+/* Overview of the four projects, below the intro */
+.overview { margin-top: 88px; padding-top: 48px; border-top: 1px solid var(--line); }
+.overview-title { max-width: 22ch; }
+.overview .lede { margin-top: 18px; }
 .about p { margin-top: 12px; max-width: 52ch; font-size: 15.5px; line-height: 1.7; color: var(--text-2); }
 .about .interests { font-size: 14px; color: var(--text-2); }
 .about .label { font: 600 1.25rem/1.2 var(--font-display); letter-spacing: -0.01em; color: var(--text); }

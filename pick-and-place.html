@@ -21,15 +21,15 @@
   <a class="skip-link" href="#doc">Skip to content</a>
 
   <header class="doc-bar">
-    <a class="doc-back" href="index.html#motion"><svg class="ic"><use href="#i-arrow"/></svg>Back to the portfolio</a>
+    <a class="doc-back" href="index.html#motion"><svg class="ic"><use href="#i-arrow"/></svg>Back to the Portfolio</a>
     <span class="doc-who">Tawfiq Abu Rub</span>
   </header>
 
   <main id="doc" class="doc">
     <header>
       <p class="eyebrow badge badge--split"><span class="hw">Hardware</span> + <span class="sim">Simulation</span></p>
-      <h1><span class="hl">Pick-and-place on a 4&#8209;DOF arm, from simulation to hardware</span></h1>
-      <p class="doc-meta">Technical write-up · ROS 2 Jazzy · MoveIt 2 · ESP32-S3</p>
+      <h1><span class="hl">Pick-and-Place on a 4&#8209;DOF Arm, From Simulation to Hardware</span></h1>
+      <p class="doc-meta">Technical Write-Up · ROS 2 Jazzy · MoveIt 2 · ESP32-S3</p>
     </header>
 
     <div class="doc-summary">
@@ -41,7 +41,7 @@
 
     <p>This page goes into more detail than the portfolio has room for. The arm is my own design: 3D printed, with a stepper on every joint and no encoders or limit switches. I wanted one manipulation stack that runs in simulation and on the real arm without changing any code, covering the whole chain from the CAD model to the motors. The task it runs is picking up a 608ZZ ball bearing and putting it down somewhere else.</p>
 
-    <h2 id="glance">At a glance</h2>
+    <h2 id="glance">At a Glance</h2>
     <div class="table-scroll">
       <table class="doc-table">
         <tbody>
@@ -59,7 +59,7 @@
       </table>
     </div>
 
-    <h2 id="architecture">How it fits together</h2>
+    <h2 id="architecture">How It Fits Together</h2>
     <p>MoveIt plans a trajectory once and hands it to a controller through two ROS&nbsp;2 actions: <code>FollowJointTrajectory</code> for the arm and <code>GripperCommand</code> for the gripper. I wrote two nodes that serve those actions. <code>arm_fake_driver</code> publishes the joint states so RViz shows the motion. <code>traj_driver</code> sends the trajectory over serial to the ESP32, which runs it on the motors. Both report back on <code>/joint_states</code>.</p>
     <p>To MoveIt the two backends look identical, so switching between the simulation and the real arm is a change in the launch file. The planner, collision model, trajectory processing and visualisation are the same code either way.</p>
 
@@ -85,7 +85,7 @@
       </div>
     </figure>
 
-    <h3>The ROS 2 packages</h3>
+    <h3>The ROS 2 Packages</h3>
     <div class="table-scroll">
       <table class="doc-table">
         <thead><tr><th scope="col">Package</th><th scope="col">What it does</th></tr></thead>
@@ -101,12 +101,12 @@
     </div>
     <p>On the ROS side it uses actions (I wrote both servers and clients), the <code>/joint_states</code>, <code>/display_planned_path</code> and <code>/monitored_planning_scene</code> topics, and TF2 through <code>robot_state_publisher</code>. The whole task is set through parameters. Python launch files cover the simulation, hardware and calibration setups. Executors are multithreaded with reentrant callback groups, and one client sits on its own single-threaded executor to keep it isolated. Everything builds with <code>colcon</code>.</p>
 
-    <h2 id="planning">Motion planning</h2>
-    <h3>The planning pipeline</h3>
+    <h2 id="planning">Motion Planning</h2>
+    <h3>The Planning Pipeline</h3>
     <p>I set the pipeline up explicitly instead of relying on MoveIt's defaults. Before planning, the request adapters run <code>ResolveConstraintFrames</code>, <code>ValidateWorkspaceBounds</code> and <code>CheckStartStateBounds</code>. OMPL's RRTConnect then finds a path, with the projection evaluator set on the two joints that do most of the moving. After planning, the response adapters run in this order: <code>AddTimeOptimalParameterization</code>, <code>AddRuckigTrajectorySmoothing</code>, <code>ValidateSolution</code>, <code>DisplayMotionPath</code>.</p>
     <p>The order matters. OMPL returns a geometric path with no timing. TOTG adds timing that respects each joint's velocity and acceleration limits, and Ruckig then reshapes it so jerk stays under its limit too, which gives S-curve motion instead of trapezoidal. On a printed arm running open loop this makes a real difference. Sudden jerk shakes the structure and can make a stepper skip, and with no encoders the arm can't tell that it happened.</p>
 
-    <h3>Limits measured on the bench</h3>
+    <h3>Limits Measured on the Bench</h3>
     <p>The velocity, acceleration and jerk limits in <code>joint_limits.yaml</code> come from testing the motors. For velocity, I ran a motor at a steady step rate and kept raising it until it stopped moving smoothly, with no serial link or streaming involved. That ceiling belongs to the motor, so I converted it through each joint's reduction to get a limit in degrees per second at the joint. The jerk limits come from each joint's acceleration limit over a fixed rise time, and they're what Ruckig enforces.</p>
     <p>Because the speed ceiling is set by the motor, doubling a joint's reduction halves its safe output speed. Any regear has to be carried through to the firmware constants and the planner limits.</p>
     <div class="table-scroll">
@@ -127,14 +127,14 @@
     <p>For the grasp poses I wrote a closed-form solver. J2, J3 and J4 all pitch about parallel axes, so if the wrist is slaved as <code>J4 = c − (J2 + J3)</code>, the three pitch angles cancel and the tool keeps the same orientation in the world apart from base yaw. Once the base yaw is taken out, that leaves a planar two-link IK problem on the wrist position. The constant <code>c</code> sets the tool convention, and one value points the jaws straight down for top-down picks.</p>
     <p>I checked the solver against a separate MuJoCo model of the same arm. They agree to 1×10<sup>−15</sup> m, which is floating-point precision.</p>
 
-    <h3>Collision model and planning scene</h3>
+    <h3>Collision Model and Planning Scene</h3>
     <p>The collision model comes from the CAD meshes, with an SRDF listing the link pairs that can never collide. The task node publishes planning-scene diffs to add the bearing, colour it, and attach or detach it. MoveIt's collision shapes don't include an annulus, and a solid cylinder would fill in the bearing's bore, so I generated a triangulated annulus mesh for it. Once the bearing is gripped it's attached to the robot, and the planner treats it as part of the arm while it's carried.</p>
 
-    <h2 id="sim-to-real">Simulation to hardware</h2>
-    <h3>One plan for both</h3>
+    <h2 id="sim-to-real">Simulation to Hardware</h2>
+    <h3>One Plan for Both</h3>
     <p>MoveIt plans once, and the same trajectory runs in RViz and on the arm. There's no separate hardware script repeating the motion. The hardware backend implements the same action interface that MoveIt's controller manager already talks to.</p>
 
-    <h3>Streaming or upload-and-execute</h3>
+    <h3>Streaming or Upload-and-Execute</h3>
     <p>I built and compared two ways of running trajectories on the hardware.</p>
     <div class="table-scroll">
       <table class="doc-table doc-table--compare">
@@ -149,13 +149,13 @@
     </div>
     <p>I built the second one after measuring the first. 43.8% of streamed frames arrived later than the window the firmware expected, and the cause was the PC operating system's scheduler rather than the firmware. Running the timing on the microcontroller takes the PC out of the loop while the arm is moving.</p>
 
-    <h3>Calibration without sensors</h3>
+    <h3>Calibration Without Sensors</h3>
     <p>The arm has no encoders or limit switches, and it can't be back-driven. The firmware zeroes its step counters at power-on and assumes the arm is at home. I built a way to teach a new home position around one rule: teaching home must never move the arm. I tested this by checking that the command frame going out is byte-for-byte the same before and after.</p>
 
-    <h3>Checking the arm follows the plan</h3>
+    <h3>Checking the Arm Follows the Plan</h3>
     <p>To confirm the hardware runs the trajectory the planner actually produced, I halved one joint's velocity limit in the planner config. The physical cycle went from 32.4 s to 48.0 s, and only the moves dominated by that joint got longer.</p>
 
-    <h2 id="task">The pick-and-place task</h2>
+    <h2 id="task">The Pick-and-Place Task</h2>
     <ol class="doc-steps">
       <li>Publish the planning scene: the table, and the bearing as a coloured annulus mesh.</li>
       <li>Open the gripper through the <code>GripperCommand</code> action.</li>
@@ -176,7 +176,7 @@
       <li>Axis signs, angle offsets and the home offset are applied in one place, so ROS and the firmware use the same definition of every joint angle.</li>
     </ul>
 
-    <h2 id="problems">Problems I ran into</h2>
+    <h2 id="problems">Problems I Ran Into</h2>
     <ul class="bullets">
       <li><strong>Choppy motion.</strong> I traced it to the PC's scheduler (43.8% of streamed frames were late) and fixed it by running trajectories on the microcontroller.</li>
       <li><strong>A joint going over its acceleration limit.</strong> The hardware driver was interpolating linearly and throwing away MoveIt's velocity and acceleration data, which drove one joint at 2.5× its acceleration limit. I replaced it with C2-continuous quintic Hermite interpolation.</li>
@@ -184,7 +184,7 @@
       <li><strong>Two controllers fighting.</strong> A point-to-point trapezoidal profiler was feeding a trajectory follower. It added no safety and the two worked against each other, so I removed the extra layer.</li>
     </ul>
 
-    <h2 id="open-items">Still to do</h2>
+    <h2 id="open-items">Still to Do</h2>
     <p>It works, and I'm still developing it. Open items:</p>
     <ul class="bullets">
       <li>One SRDF collision pair is marked as never colliding, but the two links come within 0.1 mm when the arm is folded.</li>
@@ -194,7 +194,7 @@
     </ul>
 
     <footer class="doc-foot">
-      <a class="btn" href="index.html#motion"><svg class="ic doc-back-ic"><use href="#i-arrow"/></svg>Back to the portfolio</a>
+      <a class="btn" href="index.html#motion"><svg class="ic doc-back-ic"><use href="#i-arrow"/></svg>Back to the Portfolio</a>
       <p>Tawfiq Abu Rub · <a href="mailto:ty.aburub@gmail.com">ty.aburub@gmail.com</a></p>
     </footer>
   </main>
